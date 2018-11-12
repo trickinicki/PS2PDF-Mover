@@ -1,6 +1,13 @@
 ﻿Imports System.IO
 
 Public Class Form1
+	Public Property Intervall As Integer = 1
+	Public Property appPath As String = Application.StartupPath() & Path.DirectorySeparatorChar
+	Public Property ConfigFileName As String = "ps2pdf.config"
+
+	Private Property configFile As New XDocument
+
+	Private lastSelectedIndex As Integer = 0
 	Public Sub New()
 
 		' Dieser Aufruf ist für den Designer erforderlich.
@@ -8,7 +15,8 @@ Public Class Form1
 
 		' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
 		OpenConfig()
-		setMainValues()
+		getMainValues()
+		getFoldersConfiguration()
 
 	End Sub
 
@@ -36,11 +44,6 @@ Public Class Form1
 	Private Sub TextBoxIntervall_Leave(sender As Object, e As EventArgs) Handles TextBoxIntervall.Leave
 		Intervall = TextBoxIntervall.Text
 
-	End Sub
-
-	Private Sub Button1_Click(sender As Object, e As EventArgs) Handles ButtonStart.Click
-
-		saveMainValues()
 	End Sub
 
 
@@ -72,11 +75,11 @@ Public Class Form1
 
 
 
-	Private Sub setMainValues()
+	Private Sub getMainValues()
 
 		'https://stackoverflow.com/questions/752271/how-to-get-xml-node-from-xdocument
 
-		Dim mainConfiguration As XElement = (From xml2 In configFile.Descendants("main")).FirstOrDefault()
+		Dim mainConfiguration As XElement = (From xml In configFile.Descendants("main")).FirstOrDefault()
 
 
 		Dim IntervallElement As XElement = mainConfiguration.Descendants("Intervall").Descendants("Value").FirstOrDefault()
@@ -99,9 +102,63 @@ Public Class Form1
 	Private Sub saveMainValues()
 
 		configFile.Descendants("main").Descendants("Intervall").FirstOrDefault().Value = Intervall
+		saveConfigFile()
 
+	End Sub
+
+	Private Sub getFoldersConfiguration()
+		'https://stackoverflow.com/questions/752271/how-to-get-xml-node-from-xdocument
+
+		Dim folderConfiguration As XElement = (From xml In configFile.Descendants("folders")).First
+
+		'Liste zuerst löschen
+		ListBoxFolders.Items.Clear()
+
+		If folderConfiguration.Nodes().Count > 0 Then
+			For Each aNode As XElement In folderConfiguration.Descendants("folderConfiguration")
+				ListBoxFolders.Items.Add(aNode.Descendants("inFolder").First.Value)
+			Next
+			ListBoxFolders.SelectedIndex = lastSelectedIndex
+
+		Else
+			ConfigurationID.Text = 0
+		End If
+
+	End Sub
+
+	Private Sub getFolderConfiguration()
+
+		If ListBoxFolders.SelectedIndex >= 0 Then
+			Dim folderConfiguration As XElement = (From xml In configFile.Descendants("folders").Descendants("folderConfiguration") Where xml.Element("inFolder").Value = ListBoxFolders.SelectedItem).First
+
+			TextBoxInFolder.Text = folderConfiguration.Descendants("inFolder").First
+			TextBoxOutFolder.Text = folderConfiguration.Descendants("outFolder").First
+		Else
+			TextBoxInFolder.Text = "Bitte Ordner wählen..."
+			TextBoxOutFolder.Text = "Bitte Ordner wählen..."
+		End If
+
+	End Sub
+
+	Private Sub saveFolderConfiguration()
+
+
+		If CInt(ConfigurationID.Text) >= 0 Then 'Update Entry
+			Dim folderConfiguration As XElement = (From xml In configFile.Descendants("folders").Descendants("folderConfiguration") Where xml.Element("inFolder").Value = ListBoxFolders.SelectedItem).First
+			folderConfiguration.Descendants("inFolder").First.SetValue(TextBoxInFolder.Text)
+			folderConfiguration.Descendants("outFolder").First.SetValue(TextBoxOutFolder.Text)
+		Else 'New Entry
+			Dim folderConfiguration As XElement = (From xml In configFile.Descendants("folders")).First
+			Dim newConfiguration As XElement = New XElement("folderConfiguration", New XElement("inFolder", TextBoxInFolder.Text))
+			Dim outFolder As XElement = New XElement("outFolder", TextBoxOutFolder.Text)
+			newConfiguration.Add(outFolder)
+			folderConfiguration.Add(newConfiguration)
+
+			lastSelectedIndex = ListBoxFolders.Items.Count
+		End If
 
 		saveConfigFile()
+		getFoldersConfiguration()
 
 	End Sub
 
@@ -111,41 +168,58 @@ Public Class Form1
 	End Sub
 
 
-
-
-
 #End Region
 
-	Public Property Intervall As Integer = 1
-	Public Property appPath As String = Application.StartupPath() & Path.DirectorySeparatorChar
-	Public Property ConfigFileName As String = "ps2pdf.config"
-
-	Private Property configFile As New XDocument
-
-	Private Sub ButtonSelectInputFolder_Click(sender As Object, e As EventArgs) Handles ButtonSelectInputFolder.Click
-		TextBoxDirectoryInput.Text = selectFolder()
-	End Sub
-
-	Private Sub ButtonSelectOutFolder_Click(sender As Object, e As EventArgs) Handles ButtonSelectOutFolder.Click
-		TextBoxDirectoryOutput.Text = selectFolder()
-	End Sub
-
-
-	Public Function selectFolder() As String
+	Public Function selectFolder(oldValue As String) As String
 		Dim OpenFolderDialog As New FolderBrowserDialog()
-		OpenFileDialog1.Filter = "Cursor Files|*.*"
 		OpenFolderDialog.Description = "Ordner auswählen"
+		OpenFolderDialog.SelectedPath = oldValue
 
 		' Show the Dialog.  
 		If OpenFolderDialog.ShowDialog() = System.Windows.Forms.DialogResult.OK Then
-
-
 			Return OpenFolderDialog.SelectedPath
 		End If
 
-		Return ""
+		Return oldValue
 
 	End Function
 
+	Private Sub ButtonSaveMainSettings_Click(sender As Object, e As EventArgs) Handles ButtonSaveMainSettings.Click
+		saveConfigFile()
+	End Sub
 
+	Private Sub ButtonSaveFolderSettings_Click(sender As Object, e As EventArgs) Handles ButtonSaveFolderSettings.Click
+		saveFolderConfiguration()
+
+		Dim ToolTip1 As New ToolTip
+		ToolTip1.IsBalloon = True
+		ToolTip1.UseFading = True
+		ToolTip1.ToolTipIcon = ToolTipIcon.None
+		ToolTip1.ToolTipTitle = "Speichern" & TextBoxIntervall.Text
+		ToolTip1.Show("Werte werden gespeichert", ButtonSaveFolderSettings, New Point(0, -80), 1000)
+	End Sub
+
+	Private Sub ButtonSelectInputFolder_Click_1(sender As Object, e As EventArgs) Handles ButtonSelectInputFolder.Click
+		TextBoxInFolder.Text = selectFolder(TextBoxInFolder.Text)
+	End Sub
+
+	Private Sub ListBoxFolders_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ListBoxFolders.SelectedIndexChanged
+		lastSelectedIndex = ListBoxFolders.SelectedIndex
+		ConfigurationID.Text = lastSelectedIndex
+		getFolderConfiguration()
+	End Sub
+
+	Private Sub ButtonNewDirectory_Click(sender As Object, e As EventArgs) Handles ButtonNewDirectory.Click
+		lastSelectedIndex = -1
+		ConfigurationID.Text = -1
+		ListBoxFolders.SelectedIndex = -1
+	End Sub
+
+	Private Sub ButtonSelectOutFolder_Click(sender As Object, e As EventArgs) Handles ButtonSelectOutFolder.Click
+		TextBoxOutFolder.Text = selectFolder(TextBoxOutFolder.Text)
+	End Sub
+
+	Private Sub ButtonStart_Click(sender As Object, e As EventArgs) Handles ButtonStart.Click
+		FolderWatcher.start(ListBoxFolders.SelectedItem)
+	End Sub
 End Class

@@ -26,15 +26,22 @@ Partial Class Form1
 		Me.Label1 = New System.Windows.Forms.Label()
 		Me.ButtonStart = New System.Windows.Forms.Button()
 		Me.LinkLabel1 = New System.Windows.Forms.LinkLabel()
-		Me.ListBox1 = New System.Windows.Forms.ListBox()
-		Me.LabelIn = New System.Windows.Forms.Label()
-		Me.LabelOut = New System.Windows.Forms.Label()
-		Me.Label2 = New System.Windows.Forms.Label()
-		Me.TextBoxDirectoryOutput = New System.Windows.Forms.TextBox()
-		Me.TextBoxDirectoryInput = New System.Windows.Forms.TextBox()
 		Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
-		Me.ButtonSelectInputFolder = New System.Windows.Forms.Button()
+		Me.ListBoxFolders = New System.Windows.Forms.ListBox()
+		Me.Panel1 = New System.Windows.Forms.Panel()
+		Me.ConfigurationID = New System.Windows.Forms.Label()
+		Me.ButtonSaveFolderSettings = New System.Windows.Forms.Button()
 		Me.ButtonSelectOutFolder = New System.Windows.Forms.Button()
+		Me.ButtonSelectInputFolder = New System.Windows.Forms.Button()
+		Me.TextBoxInFolder = New System.Windows.Forms.TextBox()
+		Me.TextBoxOutFolder = New System.Windows.Forms.TextBox()
+		Me.Label2 = New System.Windows.Forms.Label()
+		Me.LabelOut = New System.Windows.Forms.Label()
+		Me.LabelIn = New System.Windows.Forms.Label()
+		Me.ButtonSaveMainSettings = New System.Windows.Forms.Button()
+		Me.ButtonNewDirectory = New System.Windows.Forms.Button()
+		Me.ButtonDeleteDirectory = New System.Windows.Forms.Button()
+		Me.Panel1.SuspendLayout()
 		Me.SuspendLayout()
 		'
 		'TextBoxIntervall
@@ -55,7 +62,7 @@ Partial Class Form1
 		'
 		'ButtonStart
 		'
-		Me.ButtonStart.Location = New System.Drawing.Point(383, 31)
+		Me.ButtonStart.Location = New System.Drawing.Point(678, 396)
 		Me.ButtonStart.Name = "ButtonStart"
 		Me.ButtonStart.Size = New System.Drawing.Size(75, 23)
 		Me.ButtonStart.TabIndex = 2
@@ -73,95 +80,155 @@ Partial Class Form1
 		Me.LinkLabel1.Text = "http://www.marcusnyberg.com/2010/01/12/how-to-create-a-printerqueu-with-net-and-w" &
 		"mi/"
 		'
-		'ListBox1
-		'
-		Me.ListBox1.FormattingEnabled = True
-		Me.ListBox1.Location = New System.Drawing.Point(16, 93)
-		Me.ListBox1.Name = "ListBox1"
-		Me.ListBox1.Size = New System.Drawing.Size(221, 251)
-		Me.ListBox1.TabIndex = 6
-		'
-		'LabelIn
-		'
-		Me.LabelIn.AutoSize = True
-		Me.LabelIn.Location = New System.Drawing.Point(282, 93)
-		Me.LabelIn.Name = "LabelIn"
-		Me.LabelIn.Size = New System.Drawing.Size(51, 13)
-		Me.LabelIn.TabIndex = 7
-		Me.LabelIn.Text = "In-Ordner"
-		'
-		'LabelOut
-		'
-		Me.LabelOut.AutoSize = True
-		Me.LabelOut.Location = New System.Drawing.Point(282, 130)
-		Me.LabelOut.Name = "LabelOut"
-		Me.LabelOut.Size = New System.Drawing.Size(59, 13)
-		Me.LabelOut.TabIndex = 8
-		Me.LabelOut.Text = "Out-Ordner"
-		'
-		'Label2
-		'
-		Me.Label2.AutoSize = True
-		Me.Label2.Location = New System.Drawing.Point(282, 165)
-		Me.Label2.Name = "Label2"
-		Me.Label2.Size = New System.Drawing.Size(0, 13)
-		Me.Label2.TabIndex = 9
-		'
-		'TextBoxDirectoryOutput
-		'
-		Me.TextBoxDirectoryOutput.Location = New System.Drawing.Point(358, 127)
-		Me.TextBoxDirectoryOutput.Name = "TextBoxDirectoryOutput"
-		Me.TextBoxDirectoryOutput.Size = New System.Drawing.Size(304, 20)
-		Me.TextBoxDirectoryOutput.TabIndex = 10
-		'
-		'TextBoxDirectoryInput
-		'
-		Me.TextBoxDirectoryInput.Location = New System.Drawing.Point(358, 90)
-		Me.TextBoxDirectoryInput.Name = "TextBoxDirectoryInput"
-		Me.TextBoxDirectoryInput.Size = New System.Drawing.Size(304, 20)
-		Me.TextBoxDirectoryInput.TabIndex = 11
-		'
 		'OpenFileDialog1
 		'
 		Me.OpenFileDialog1.FileName = "OpenFileDialog1"
 		'
-		'ButtonSelectInputFolder
+		'ListBoxFolders
 		'
-		Me.ButtonSelectInputFolder.Location = New System.Drawing.Point(668, 88)
-		Me.ButtonSelectInputFolder.Name = "ButtonSelectInputFolder"
-		Me.ButtonSelectInputFolder.Size = New System.Drawing.Size(25, 23)
-		Me.ButtonSelectInputFolder.TabIndex = 12
-		Me.ButtonSelectInputFolder.Text = "..."
-		Me.ButtonSelectInputFolder.UseVisualStyleBackColor = True
+		Me.ListBoxFolders.FormattingEnabled = True
+		Me.ListBoxFolders.Location = New System.Drawing.Point(3, 3)
+		Me.ListBoxFolders.Name = "ListBoxFolders"
+		Me.ListBoxFolders.Size = New System.Drawing.Size(221, 251)
+		Me.ListBoxFolders.TabIndex = 7
+		'
+		'Panel1
+		'
+		Me.Panel1.Controls.Add(Me.ButtonDeleteDirectory)
+		Me.Panel1.Controls.Add(Me.ButtonNewDirectory)
+		Me.Panel1.Controls.Add(Me.ConfigurationID)
+		Me.Panel1.Controls.Add(Me.ButtonSaveFolderSettings)
+		Me.Panel1.Controls.Add(Me.ButtonSelectOutFolder)
+		Me.Panel1.Controls.Add(Me.ButtonSelectInputFolder)
+		Me.Panel1.Controls.Add(Me.TextBoxInFolder)
+		Me.Panel1.Controls.Add(Me.TextBoxOutFolder)
+		Me.Panel1.Controls.Add(Me.Label2)
+		Me.Panel1.Controls.Add(Me.LabelOut)
+		Me.Panel1.Controls.Add(Me.LabelIn)
+		Me.Panel1.Controls.Add(Me.ListBoxFolders)
+		Me.Panel1.Location = New System.Drawing.Point(16, 71)
+		Me.Panel1.Name = "Panel1"
+		Me.Panel1.Size = New System.Drawing.Size(737, 295)
+		Me.Panel1.TabIndex = 14
+		'
+		'ConfigurationID
+		'
+		Me.ConfigurationID.AutoSize = True
+		Me.ConfigurationID.Location = New System.Drawing.Point(681, 28)
+		Me.ConfigurationID.Name = "ConfigurationID"
+		Me.ConfigurationID.Size = New System.Drawing.Size(39, 13)
+		Me.ConfigurationID.TabIndex = 22
+		Me.ConfigurationID.Text = "Label3"
+		'
+		'ButtonSaveFolderSettings
+		'
+		Me.ButtonSaveFolderSettings.Location = New System.Drawing.Point(576, 103)
+		Me.ButtonSaveFolderSettings.Name = "ButtonSaveFolderSettings"
+		Me.ButtonSaveFolderSettings.Size = New System.Drawing.Size(75, 23)
+		Me.ButtonSaveFolderSettings.TabIndex = 21
+		Me.ButtonSaveFolderSettings.Text = "speichern"
+		Me.ButtonSaveFolderSettings.UseVisualStyleBackColor = True
 		'
 		'ButtonSelectOutFolder
 		'
-		Me.ButtonSelectOutFolder.Location = New System.Drawing.Point(668, 125)
+		Me.ButtonSelectOutFolder.Location = New System.Drawing.Point(626, 63)
 		Me.ButtonSelectOutFolder.Name = "ButtonSelectOutFolder"
 		Me.ButtonSelectOutFolder.Size = New System.Drawing.Size(25, 23)
-		Me.ButtonSelectOutFolder.TabIndex = 13
+		Me.ButtonSelectOutFolder.TabIndex = 20
 		Me.ButtonSelectOutFolder.Text = "..."
 		Me.ButtonSelectOutFolder.UseVisualStyleBackColor = True
+		'
+		'ButtonSelectInputFolder
+		'
+		Me.ButtonSelectInputFolder.Location = New System.Drawing.Point(626, 26)
+		Me.ButtonSelectInputFolder.Name = "ButtonSelectInputFolder"
+		Me.ButtonSelectInputFolder.Size = New System.Drawing.Size(25, 23)
+		Me.ButtonSelectInputFolder.TabIndex = 19
+		Me.ButtonSelectInputFolder.Text = "..."
+		Me.ButtonSelectInputFolder.UseVisualStyleBackColor = True
+		'
+		'TextBoxInFolder
+		'
+		Me.TextBoxInFolder.Location = New System.Drawing.Point(316, 28)
+		Me.TextBoxInFolder.Name = "TextBoxInFolder"
+		Me.TextBoxInFolder.Size = New System.Drawing.Size(304, 20)
+		Me.TextBoxInFolder.TabIndex = 18
+		'
+		'TextBoxOutFolder
+		'
+		Me.TextBoxOutFolder.Location = New System.Drawing.Point(316, 65)
+		Me.TextBoxOutFolder.Name = "TextBoxOutFolder"
+		Me.TextBoxOutFolder.Size = New System.Drawing.Size(304, 20)
+		Me.TextBoxOutFolder.TabIndex = 17
+		'
+		'Label2
+		'
+		Me.Label2.AutoSize = True
+		Me.Label2.Location = New System.Drawing.Point(240, 103)
+		Me.Label2.Name = "Label2"
+		Me.Label2.Size = New System.Drawing.Size(0, 13)
+		Me.Label2.TabIndex = 16
+		'
+		'LabelOut
+		'
+		Me.LabelOut.AutoSize = True
+		Me.LabelOut.Location = New System.Drawing.Point(240, 68)
+		Me.LabelOut.Name = "LabelOut"
+		Me.LabelOut.Size = New System.Drawing.Size(59, 13)
+		Me.LabelOut.TabIndex = 15
+		Me.LabelOut.Text = "Out-Ordner"
+		'
+		'LabelIn
+		'
+		Me.LabelIn.AutoSize = True
+		Me.LabelIn.Location = New System.Drawing.Point(240, 31)
+		Me.LabelIn.Name = "LabelIn"
+		Me.LabelIn.Size = New System.Drawing.Size(51, 13)
+		Me.LabelIn.TabIndex = 14
+		Me.LabelIn.Text = "In-Ordner"
+		'
+		'ButtonSaveMainSettings
+		'
+		Me.ButtonSaveMainSettings.Location = New System.Drawing.Point(256, 26)
+		Me.ButtonSaveMainSettings.Name = "ButtonSaveMainSettings"
+		Me.ButtonSaveMainSettings.Size = New System.Drawing.Size(75, 23)
+		Me.ButtonSaveMainSettings.TabIndex = 15
+		Me.ButtonSaveMainSettings.Text = "speichern"
+		Me.ButtonSaveMainSettings.UseVisualStyleBackColor = True
+		'
+		'ButtonNewDirectory
+		'
+		Me.ButtonNewDirectory.Location = New System.Drawing.Point(576, -1)
+		Me.ButtonNewDirectory.Name = "ButtonNewDirectory"
+		Me.ButtonNewDirectory.Size = New System.Drawing.Size(75, 23)
+		Me.ButtonNewDirectory.TabIndex = 23
+		Me.ButtonNewDirectory.Text = "neu"
+		Me.ButtonNewDirectory.UseVisualStyleBackColor = True
+		'
+		'ButtonDeleteDirectory
+		'
+		Me.ButtonDeleteDirectory.Location = New System.Drawing.Point(495, 103)
+		Me.ButtonDeleteDirectory.Name = "ButtonDeleteDirectory"
+		Me.ButtonDeleteDirectory.Size = New System.Drawing.Size(75, 23)
+		Me.ButtonDeleteDirectory.TabIndex = 24
+		Me.ButtonDeleteDirectory.Text = "löschen"
+		Me.ButtonDeleteDirectory.UseVisualStyleBackColor = True
 		'
 		'Form1
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 		Me.ClientSize = New System.Drawing.Size(781, 431)
-		Me.Controls.Add(Me.ButtonSelectOutFolder)
-		Me.Controls.Add(Me.ButtonSelectInputFolder)
-		Me.Controls.Add(Me.TextBoxDirectoryInput)
-		Me.Controls.Add(Me.TextBoxDirectoryOutput)
-		Me.Controls.Add(Me.Label2)
-		Me.Controls.Add(Me.LabelOut)
-		Me.Controls.Add(Me.LabelIn)
-		Me.Controls.Add(Me.ListBox1)
+		Me.Controls.Add(Me.ButtonSaveMainSettings)
 		Me.Controls.Add(Me.LinkLabel1)
 		Me.Controls.Add(Me.ButtonStart)
 		Me.Controls.Add(Me.Label1)
 		Me.Controls.Add(Me.TextBoxIntervall)
+		Me.Controls.Add(Me.Panel1)
 		Me.Name = "Form1"
 		Me.Text = "DruckjobsMover"
+		Me.Panel1.ResumeLayout(False)
+		Me.Panel1.PerformLayout()
 		Me.ResumeLayout(False)
 		Me.PerformLayout()
 
@@ -171,13 +238,19 @@ Partial Class Form1
 	Friend WithEvents Label1 As Label
 	Friend WithEvents ButtonStart As Button
 	Friend WithEvents LinkLabel1 As LinkLabel
-	Friend WithEvents ListBox1 As ListBox
-	Friend WithEvents LabelIn As Label
-	Friend WithEvents LabelOut As Label
-	Friend WithEvents Label2 As Label
-	Friend WithEvents TextBoxDirectoryOutput As TextBox
-	Friend WithEvents TextBoxDirectoryInput As TextBox
 	Friend WithEvents OpenFileDialog1 As OpenFileDialog
-	Friend WithEvents ButtonSelectInputFolder As Button
+	Friend WithEvents ListBoxFolders As ListBox
+	Friend WithEvents Panel1 As Panel
 	Friend WithEvents ButtonSelectOutFolder As Button
+	Friend WithEvents ButtonSelectInputFolder As Button
+	Friend WithEvents TextBoxInFolder As TextBox
+	Friend WithEvents TextBoxOutFolder As TextBox
+	Friend WithEvents Label2 As Label
+	Friend WithEvents LabelOut As Label
+	Friend WithEvents LabelIn As Label
+	Friend WithEvents ButtonSaveMainSettings As Button
+	Friend WithEvents ButtonSaveFolderSettings As Button
+	Friend WithEvents ConfigurationID As Label
+	Friend WithEvents ButtonDeleteDirectory As Button
+	Friend WithEvents ButtonNewDirectory As Button
 End Class
