@@ -79,13 +79,13 @@ Public Class Form1
 		Dim mainConfiguration As XElement = (From xml2 In configFile.Descendants("main")).FirstOrDefault()
 
 
-		Dim IntervallElement As XElement = mainConfiguration.Descendants("Intervall").FirstOrDefault()
+		Dim IntervallElement As XElement = mainConfiguration.Descendants("Intervall").Descendants("Value").FirstOrDefault()
 		If IsNothing(IntervallElement) Then
 			Dim newNode As XElement = New XElement("Intervall", New XElement("Value", Intervall))
 			mainConfiguration.Add(newNode)
 
 		Else
-			Intervall = IntervallElement.Descendants("Value").FirstOrDefault
+			Intervall = IntervallElement
 		End If
 
 		'Fals neue Standardwerte übergeben wurden, müssen diese gespeichert werden
@@ -121,6 +121,31 @@ Public Class Form1
 	Public Property ConfigFileName As String = "ps2pdf.config"
 
 	Private Property configFile As New XDocument
+
+	Private Sub ButtonSelectInputFolder_Click(sender As Object, e As EventArgs) Handles ButtonSelectInputFolder.Click
+		TextBoxDirectoryInput.Text = selectFolder()
+	End Sub
+
+	Private Sub ButtonSelectOutFolder_Click(sender As Object, e As EventArgs) Handles ButtonSelectOutFolder.Click
+		TextBoxDirectoryOutput.Text = selectFolder()
+	End Sub
+
+
+	Public Function selectFolder() As String
+		Dim OpenFolderDialog As New FolderBrowserDialog()
+		OpenFileDialog1.Filter = "Cursor Files|*.*"
+		OpenFolderDialog.Description = "Ordner auswählen"
+
+		' Show the Dialog.  
+		If OpenFolderDialog.ShowDialog() = System.Windows.Forms.DialogResult.OK Then
+
+
+			Return OpenFolderDialog.SelectedPath
+		End If
+
+		Return ""
+
+	End Function
 
 
 End Class
