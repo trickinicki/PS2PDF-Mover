@@ -3,35 +3,56 @@
 
 Module FolderWatcher
 
-	'	Private WithEvents m_fsw As New List(Of IO.FileSystemWatcher)
-	Private outFolder As String
+	Private m_fsw As New List(Of IO.FileSystemWatcher)
+	Private mainConfig As New config
 
-	Public Sub start(aInfolder As String, aOutFolder As String)
 
-		outFolder = aOutFolder
+	Public Sub start()
 
-		Dim aNewfsw As New FileSystemWatcher(aInfolder)
-		AddHandler aNewfsw.Changed, AddressOf OnChanged
-		aNewfsw.EnableRaisingEvents = True
+		mainConfig.OpenConfig()
 
+		For Each aFolderConfig In mainConfig.folderConfigurations
+			Dim aNewfsw As New FileSystemWatcher(aFolderConfig.inFolder)
+			AddHandler aNewfsw.Changed, AddressOf OnChanged
+			aNewfsw.EnableRaisingEvents = True
+			m_fsw.Add(aNewfsw)
+		Next
 
 	End Sub
 
 	Public Sub stopWatching()
-		'	m_fsw.EnableRaisingEvents = False
+		For Each aFileSystemWatcher As FileSystemWatcher In m_fsw
+			aFileSystemWatcher.EnableRaisingEvents = False
+			aFileSystemWatcher.Dispose()
+		Next
 	End Sub
 
 	Private Async Sub OnChanged(sender As Object, e As FileSystemEventArgs)
 
 		If Await IsFileReady(e.FullPath) Then
 
+			'get outFolder name
+			Dim inFolder As String = e.FullPath.Replace("\" & e.Name, "")
+			Dim outFolder As String = ""
+			For Each aFolderconfig In mainConfig.folderConfigurations
+				If aFolderconfig.inFolder = inFolder Then
+					outFolder = aFolderconfig.outFolder
+					Exit For
+				End If
+			Next
+
 			'Datei umbenamsen
 			Dim newFileName As String = getJobNameFromPS(e.FullPath)
+
 
 			If File.Exists(outFolder & "\" & newFileName) Then File.Delete(outFolder & "\" & newFileName)
 
 			'Datei verschieben
 			File.Move(e.FullPath, outFolder & "\" & newFileName)
+
+			''Log
+			'Dim aForm As New Form1
+			'aForm.logs = Format(Now, "dd.mm.yy hh:mm:ss") & ": " & outFolder & "\" & newFileName & vbCrLf & Form1.TextBoxLogging.Text
 
 		End If
 

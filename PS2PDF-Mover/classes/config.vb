@@ -4,16 +4,23 @@ Imports System.IO
 
 Public Class config
 
-	Public Property Intervall As Integer = 1
+	'Dim _folderConfigurations As List(Of folderConfiguration)
+
+	Private Property configFile As New XDocument
+
 	Public Property appPath As String = Application.StartupPath() & Path.DirectorySeparatorChar
 	Public Property ConfigFileName As String = "ps2pdf.config"
 
-	Public Property folderConfigurations As List(Of folderConfiguration)
-	Private Property configFile As New XDocument
+	Public ReadOnly Property folderConfigurations As List(Of folderConfiguration)
+		Get
+			folderConfigurations = getFoldersConfiguration()
+		End Get
+	End Property
+
+	Public Property Intervall As Integer = 1
 
 
-
-	Public Function OpenConfig() As config
+	Public Sub OpenConfig()
 		'Überprüft ob Konfigurationsdatei existiert undd öffnet diese
 		'Falls die Datei noch nicht vorhanden ist wird sie generiert
 		'und mit den nötigen Nodes versehen
@@ -38,20 +45,18 @@ Public Class config
 
 		If saveConfig Then configFile.Save(appPath & ConfigFileName)
 
-		aMainConfig = getMainValues(aMainConfig)
-		aMainConfig = getFoldersConfiguration(aMainConfig)
+		getMainValues()
 
-		Return aMainConfig
-	End Function
+	End Sub
 
 
-	Private Function getMainValues(aMainConfig As config)
+	Private Sub getMainValues()
 		Dim saveConfig As Boolean = False
 		'https://stackoverflow.com/questions/752271/how-to-get-xml-node-from-xdocument
 
 		Dim mainConfiguration As XElement = (From xml In configFile.Descendants("main")).FirstOrDefault()
 
-		Dim IntervallElement As XElement = mainConfiguration.Descendants("Intervall").Descendants("Value").FirstOrDefault()
+		Dim IntervallElement As XElement = mainConfiguration.Descendants("Intervall").FirstOrDefault()
 		If IsNothing(IntervallElement) Then
 			Dim newNode As XElement = New XElement("Intervall", New XElement("Value", Intervall))
 			mainConfiguration.Add(newNode)
@@ -64,19 +69,17 @@ Public Class config
 		'Falls neue Standardwerte übergeben wurden, müssen diese gespeichert werden (bei neuinstallation)
 		If saveConfig Then saveConfigFile()
 
-		aMainConfig.Intervall = Intervall
-		Return aMainConfig
 
-	End Function
+	End Sub
 
-	Private Sub saveMainValues()
+	Public Sub saveMainValues()
 
 		configFile.Descendants("main").Descendants("Intervall").FirstOrDefault().Value = Intervall
 		saveConfigFile()
 
 	End Sub
 
-	Private Function getFoldersConfiguration(aMainConfig As config) As config
+	Private Function getFoldersConfiguration() As List(Of folderConfiguration)
 		'https://stackoverflow.com/questions/752271/how-to-get-xml-node-from-xdocument
 
 		Dim xmlFolderConfiguration As XElement = (From xml In configFile.Descendants("folders")).First
@@ -90,17 +93,17 @@ Public Class config
 				manyFolderConfigutations.Add(aNewFolderConfiguration)
 			Next
 		End If
-		aMainConfig.folderConfigurations = manyFolderConfigutations
 
-		Return aMainConfig
+
+		Return manyFolderConfigutations
 	End Function
 
 
 	Public Sub saveFolderConfiguration(newfolderConfiguration As folderConfiguration, oldFolderConfiguration As folderConfiguration)
 
-		Dim xmlfolderConfiguration As XElement = (From xml In configFile.Descendants("folders").Descendants("folderConfiguration") Where xml.Element("inFolder").Value = oldFolderConfiguration.inFolder).First
 
-		If Not IsNothing(xmlfolderConfiguration) Then 'Update Entry
+		If Not IsNothing(oldFolderConfiguration.inFolder) Then 'Update Entry
+			Dim xmlfolderConfiguration As XElement = (From xml In configFile.Descendants("folders").Descendants("folderConfiguration") Where xml.Element("inFolder").Value = oldFolderConfiguration.inFolder).First
 
 			xmlfolderConfiguration.Descendants("inFolder").First.SetValue(newfolderConfiguration.inFolder)
 			xmlfolderConfiguration.Descendants("outFolder").First.SetValue(newfolderConfiguration.outFolder)

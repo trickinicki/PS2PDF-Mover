@@ -11,18 +11,24 @@ Public Class Form1
 		InitializeComponent()
 
 		' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
-		mainConfig = mainConfig.OpenConfig
+		mainConfig.OpenConfig()
 
 		TextBoxIntervall.Text = mainConfig.Intervall
 
-		For Each aFolderConfig As folderConfiguration In mainConfig.folderConfigurations
-			ListBoxFolders.Items.Add(aFolderConfig.inFolder)
-
-		Next
-
+		refreshFolderConfigutations()
 
 		startWatching()
 	End Sub
+
+	Public Property logs() As String
+		Get
+			logs = TextBoxLogging.Text
+		End Get
+
+		Set(value As String)
+			TextBoxLogging.Text = value
+		End Set
+	End Property
 
 
 	Private Sub TextBoxIntervall_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TextBoxIntervall.KeyPress
@@ -46,7 +52,7 @@ Public Class Form1
 	End Sub
 
 	Private Sub TextBoxIntervall_Leave(sender As Object, e As EventArgs) Handles TextBoxIntervall.Leave
-		'Intervall = TextBoxIntervall.Text
+		mainConfig.Intervall = TextBoxIntervall.Text
 
 	End Sub
 
@@ -66,7 +72,7 @@ Public Class Form1
 	End Function
 
 	Private Sub ButtonSaveMainSettings_Click(sender As Object, e As EventArgs) Handles ButtonSaveMainSettings.Click
-		mainConfig.saveConfigFile()
+		mainConfig.saveMainValues()
 	End Sub
 
 	Private Sub ButtonSaveFolderSettings_Click(sender As Object, e As EventArgs) Handles ButtonSaveFolderSettings.Click
@@ -86,6 +92,8 @@ Public Class Form1
 		ToolTip1.ToolTipIcon = ToolTipIcon.None
 		ToolTip1.ToolTipTitle = "Speichern" & TextBoxIntervall.Text
 		ToolTip1.Show("Werte werden gespeichert", ButtonSaveFolderSettings, New Point(0, -80), 1000)
+
+		refreshFolderConfigutations()
 	End Sub
 
 	Private Sub ButtonSelectInputFolder_Click_1(sender As Object, e As EventArgs) Handles ButtonSelectInputFolder.Click
@@ -96,16 +104,20 @@ Public Class Form1
 		lastSelectedIndex = ListBoxFolders.SelectedIndex
 		ConfigurationID.Text = lastSelectedIndex
 
-		Dim aFolderConfig As folderConfiguration = mainConfig.folderConfigurations.Item(lastSelectedIndex)
-		TextBoxInFolder.Text = aFolderConfig.inFolder
-		TextBoxOutFolder.Text = aFolderConfig.outFolder
-
+		If lastSelectedIndex >= 0 Then
+			Dim aFolderConfig As folderConfiguration = mainConfig.folderConfigurations.Item(lastSelectedIndex)
+			TextBoxInFolder.Text = aFolderConfig.inFolder
+			TextBoxOutFolder.Text = aFolderConfig.outFolder
+		End If
 	End Sub
 
 	Private Sub ButtonNewDirectory_Click(sender As Object, e As EventArgs) Handles ButtonNewDirectory.Click
 		lastSelectedIndex = -1
 		ConfigurationID.Text = -1
 		ListBoxFolders.SelectedIndex = -1
+
+		TextBoxInFolder.Text = "Bitte Ordner auswählen ..."
+		TextBoxOutFolder.Text = "Bitte Ordner auswählen ..."
 	End Sub
 
 	Private Sub ButtonSelectOutFolder_Click(sender As Object, e As EventArgs) Handles ButtonSelectOutFolder.Click
@@ -121,18 +133,36 @@ Public Class Form1
 		Dim aFolderConfig As New folderConfiguration
 		aFolderConfig.inFolder = ListBoxFolders.SelectedItem
 		mainConfig.deleteFolderConfiguration(aFolderConfig)
-
+		refreshFolderConfigutations()
 
 	End Sub
 
+	Private Sub refreshFolderConfigutations()
+		ListBoxFolders.Items.Clear()
+
+		For Each aFolderConfig As folderConfiguration In mainConfig.folderConfigurations
+			ListBoxFolders.Items.Add(aFolderConfig.inFolder)
+		Next
+
+		If mainConfig.folderConfigurations.Count > 0 Then
+			If lastSelectedIndex > mainConfig.folderConfigurations.Count - 1 Then
+				lastSelectedIndex = mainConfig.folderConfigurations.Count - 1
+			End If
+			ListBoxFolders.SelectedIndex = lastSelectedIndex
+		End If
+  End Sub
 
 	Public Sub startWatching()
-		'If ButtonStart.Text = "Start" Then
-		'	FolderWatcher.start(TextBoxInFolder.Text, TextBoxOutFolder.Text)
-		'	ButtonStart.Text = "Stop"
-		'Else
-		'	FolderWatcher.stopWatching()
-		'	ButtonStart.Text = "Start"
-		'End If
+		If ButtonStart.Text = "Start" Then
+			FolderWatcher.start()
+			ButtonStart.Text = "Stop"
+			LabelWatchedFolders.Text = mainConfig.folderConfigurations.Count & " Ordner werden überwacht."
+		Else
+			FolderWatcher.stopWatching()
+			ButtonStart.Text = "Start"
+			LabelWatchedFolders.Text = "Ordnerüberwachung gestoppt!"
+		End If
 	End Sub
+
+
 End Class

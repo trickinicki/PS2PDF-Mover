@@ -41,6 +41,8 @@ Partial Class Form1
 		Me.LabelOut = New System.Windows.Forms.Label()
 		Me.LabelIn = New System.Windows.Forms.Label()
 		Me.ButtonSaveMainSettings = New System.Windows.Forms.Button()
+		Me.TextBoxLogging = New System.Windows.Forms.TextBox()
+		Me.LabelWatchedFolders = New System.Windows.Forms.Label()
 		Me.Panel1.SuspendLayout()
 		Me.SuspendLayout()
 		'
@@ -89,7 +91,7 @@ Partial Class Form1
 		Me.ListBoxFolders.FormattingEnabled = True
 		Me.ListBoxFolders.Location = New System.Drawing.Point(3, 3)
 		Me.ListBoxFolders.Name = "ListBoxFolders"
-		Me.ListBoxFolders.Size = New System.Drawing.Size(221, 251)
+		Me.ListBoxFolders.Size = New System.Drawing.Size(221, 134)
 		Me.ListBoxFolders.TabIndex = 7
 		'
 		'Panel1
@@ -108,7 +110,7 @@ Partial Class Form1
 		Me.Panel1.Controls.Add(Me.ListBoxFolders)
 		Me.Panel1.Location = New System.Drawing.Point(16, 71)
 		Me.Panel1.Name = "Panel1"
-		Me.Panel1.Size = New System.Drawing.Size(737, 295)
+		Me.Panel1.Size = New System.Drawing.Size(737, 144)
 		Me.Panel1.TabIndex = 14
 		'
 		'ButtonDeleteDirectory
@@ -214,11 +216,31 @@ Partial Class Form1
 		Me.ButtonSaveMainSettings.Text = "speichern"
 		Me.ButtonSaveMainSettings.UseVisualStyleBackColor = True
 		'
+		'TextBoxLogging
+		'
+		Me.TextBoxLogging.Location = New System.Drawing.Point(16, 231)
+		Me.TextBoxLogging.Multiline = True
+		Me.TextBoxLogging.Name = "TextBoxLogging"
+		Me.TextBoxLogging.Size = New System.Drawing.Size(601, 135)
+		Me.TextBoxLogging.TabIndex = 16
+		'
+		'LabelWatchedFolders
+		'
+		Me.LabelWatchedFolders.AutoSize = True
+		Me.LabelWatchedFolders.ForeColor = System.Drawing.Color.Red
+		Me.LabelWatchedFolders.Location = New System.Drawing.Point(624, 231)
+		Me.LabelWatchedFolders.Name = "LabelWatchedFolders"
+		Me.LabelWatchedFolders.Size = New System.Drawing.Size(39, 13)
+		Me.LabelWatchedFolders.TabIndex = 17
+		Me.LabelWatchedFolders.Text = "Label3"
+		'
 		'Form1
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 		Me.ClientSize = New System.Drawing.Size(781, 431)
+		Me.Controls.Add(Me.LabelWatchedFolders)
+		Me.Controls.Add(Me.TextBoxLogging)
 		Me.Controls.Add(Me.ButtonSaveMainSettings)
 		Me.Controls.Add(Me.LinkLabel1)
 		Me.Controls.Add(Me.ButtonStart)
@@ -253,4 +275,6 @@ Partial Class Form1
 	Friend WithEvents ConfigurationID As Label
 	Friend WithEvents ButtonDeleteDirectory As Button
 	Friend WithEvents ButtonNewDirectory As Button
+	Friend WithEvents LabelWatchedFolders As Label
+	Public WithEvents TextBoxLogging As TextBox
 End Class
