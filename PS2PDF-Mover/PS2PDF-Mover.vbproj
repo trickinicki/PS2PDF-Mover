@@ -72,6 +72,8 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="classes\config.vb" />
+    <Compile Include="classes\folderConfiguration.vb" />
     <Compile Include="FolderWatcher.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>

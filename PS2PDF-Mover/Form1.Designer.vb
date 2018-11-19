@@ -29,6 +29,8 @@ Partial Class Form1
 		Me.OpenFileDialog1 = New System.Windows.Forms.OpenFileDialog()
 		Me.ListBoxFolders = New System.Windows.Forms.ListBox()
 		Me.Panel1 = New System.Windows.Forms.Panel()
+		Me.ButtonDeleteDirectory = New System.Windows.Forms.Button()
+		Me.ButtonNewDirectory = New System.Windows.Forms.Button()
 		Me.ConfigurationID = New System.Windows.Forms.Label()
 		Me.ButtonSaveFolderSettings = New System.Windows.Forms.Button()
 		Me.ButtonSelectOutFolder = New System.Windows.Forms.Button()
@@ -39,8 +41,6 @@ Partial Class Form1
 		Me.LabelOut = New System.Windows.Forms.Label()
 		Me.LabelIn = New System.Windows.Forms.Label()
 		Me.ButtonSaveMainSettings = New System.Windows.Forms.Button()
-		Me.ButtonNewDirectory = New System.Windows.Forms.Button()
-		Me.ButtonDeleteDirectory = New System.Windows.Forms.Button()
 		Me.Panel1.SuspendLayout()
 		Me.SuspendLayout()
 		'
@@ -110,6 +110,24 @@ Partial Class Form1
 		Me.Panel1.Name = "Panel1"
 		Me.Panel1.Size = New System.Drawing.Size(737, 295)
 		Me.Panel1.TabIndex = 14
+		'
+		'ButtonDeleteDirectory
+		'
+		Me.ButtonDeleteDirectory.Location = New System.Drawing.Point(495, 103)
+		Me.ButtonDeleteDirectory.Name = "ButtonDeleteDirectory"
+		Me.ButtonDeleteDirectory.Size = New System.Drawing.Size(75, 23)
+		Me.ButtonDeleteDirectory.TabIndex = 24
+		Me.ButtonDeleteDirectory.Text = "löschen"
+		Me.ButtonDeleteDirectory.UseVisualStyleBackColor = True
+		'
+		'ButtonNewDirectory
+		'
+		Me.ButtonNewDirectory.Location = New System.Drawing.Point(576, -1)
+		Me.ButtonNewDirectory.Name = "ButtonNewDirectory"
+		Me.ButtonNewDirectory.Size = New System.Drawing.Size(75, 23)
+		Me.ButtonNewDirectory.TabIndex = 23
+		Me.ButtonNewDirectory.Text = "neu"
+		Me.ButtonNewDirectory.UseVisualStyleBackColor = True
 		'
 		'ConfigurationID
 		'
@@ -195,24 +213,6 @@ Partial Class Form1
 		Me.ButtonSaveMainSettings.TabIndex = 15
 		Me.ButtonSaveMainSettings.Text = "speichern"
 		Me.ButtonSaveMainSettings.UseVisualStyleBackColor = True
-		'
-		'ButtonNewDirectory
-		'
-		Me.ButtonNewDirectory.Location = New System.Drawing.Point(576, -1)
-		Me.ButtonNewDirectory.Name = "ButtonNewDirectory"
-		Me.ButtonNewDirectory.Size = New System.Drawing.Size(75, 23)
-		Me.ButtonNewDirectory.TabIndex = 23
-		Me.ButtonNewDirectory.Text = "neu"
-		Me.ButtonNewDirectory.UseVisualStyleBackColor = True
-		'
-		'ButtonDeleteDirectory
-		'
-		Me.ButtonDeleteDirectory.Location = New System.Drawing.Point(495, 103)
-		Me.ButtonDeleteDirectory.Name = "ButtonDeleteDirectory"
-		Me.ButtonDeleteDirectory.Size = New System.Drawing.Size(75, 23)
-		Me.ButtonDeleteDirectory.TabIndex = 24
-		Me.ButtonDeleteDirectory.Text = "löschen"
-		Me.ButtonDeleteDirectory.UseVisualStyleBackColor = True
 		'
 		'Form1
 		'
