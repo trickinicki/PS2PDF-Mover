@@ -6,19 +6,29 @@ Module FolderWatcher
 	Private m_fsw As New List(Of IO.FileSystemWatcher)
 	Private mainConfig As New config
 
+	''' <summary>
+	''' Start Folder wacthing
+	''' </summary>
+	''' <returns>Number of active FileSystemWatcher</returns>
+	Public Function start() As Integer
 
-	Public Sub start()
+		'Stop any ongoing filewatcher
+		stopWatching()
 
-		mainConfig.OpenConfig()
 
+		mainConfig.LoadConfig()
+		Dim aCounter As Integer
 		For Each aFolderConfig In mainConfig.folderConfigurations
-			Dim aNewfsw As New FileSystemWatcher(aFolderConfig.inFolder)
-			AddHandler aNewfsw.Changed, AddressOf OnChanged
-			aNewfsw.EnableRaisingEvents = True
-			m_fsw.Add(aNewfsw)
+			If aFolderConfig.active Then
+				Dim aNewfsw As New FileSystemWatcher(aFolderConfig.inFolder)
+				AddHandler aNewfsw.Changed, AddressOf OnChanged
+				aNewfsw.EnableRaisingEvents = True
+				m_fsw.Add(aNewfsw)
+				aCounter += 1
+			End If
 		Next
-
-	End Sub
+		Return aCounter
+	End Function
 
 	Public Sub stopWatching()
 		For Each aFileSystemWatcher As FileSystemWatcher In m_fsw
@@ -76,26 +86,22 @@ Module FolderWatcher
 		'<file-name syntax="text" xml:space="preserve">Microsoft Word - Brief an Neff 26-06-2018.docx</file-name>
 		Dim aLine As String
 		Dim reader As New StreamReader(filename, System.Text.Encoding.Default)
+		Dim lineCounter As Integer
 
-		Dim lineNames As New List(Of String)
-		lineNames.Add("job-name")
-		lineNames.Add("file-name")
+		Dim PSFieldNames As New List(Of String)
+		PSFieldNames = (From s In mainConfig.PSFieldNames.Split(";") Select s).ToList()
 
 
 		Dim fileExtension As New List(Of String)
-		fileExtension.Add(".docx")
-		fileExtension.Add(".doc")
-		fileExtension.Add(".xlsx")
-		fileExtension.Add(".xls")
-		fileExtension.Add(".indd")
+		fileExtension = (From s In mainConfig.FileExtensions.Split(";") Select s).ToList()
 
-		Dim relpaceTexts As New List(Of String)
-		relpaceTexts.Add("Microsoft Word - ")
-		relpaceTexts.Add("Microsoft Excel - ")
+		Dim ProgramPrefixes As New List(Of String) 
+		ProgramPrefixes = (From s In mainConfig.ProgramPrefixes.Split(";") Select s).ToList()
 
 		Do
 			aLine = reader.ReadLine
-			For Each aName As String In lineNames
+			For Each aName As String In PSFieldNames
+
 				If aLine.IndexOf(aName) > 0 Then
 					reader.Close()
 
@@ -104,19 +110,21 @@ Module FolderWatcher
 
 					Dim newName As String = aLine.Substring(startIndex + 1, StopIndex - startIndex - 1)
 					For Each aExtension In fileExtension
-						newName = newName.Replace(aExtension, "")
+						If aExtension <> "" Then newName = newName.Replace(aExtension, "")
 					Next
 
-					For Each aText In relpaceTexts
-						newName = newName.Replace(aText, "")
+					For Each aProgramPrefixes In ProgramPrefixes
+						If aProgramPrefixes <> "" Then newName = newName.Replace(aProgramPrefixes, "")
 					Next
 
 
 					Return newName & ".ps"
 
 				End If
-			Next
 
+			Next
+			lineCounter += 1
+			If lineCounter > 100 Then Exit Do
 		Loop Until aLine Is Nothing
 		reader.Close()
 

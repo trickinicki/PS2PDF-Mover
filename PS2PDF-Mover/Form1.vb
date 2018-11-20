@@ -11,24 +11,20 @@ Public Class Form1
 		InitializeComponent()
 
 		' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
-		mainConfig.OpenConfig()
+		mainConfig.LoadConfig()
 
-		TextBoxIntervall.Text = mainConfig.Intervall
+		With mainConfig
+			TextBoxIntervall.Text = .Intervall
+			TextBoxFileExtensions.Text = mainConfig.FileExtensions
+			TextBoxProgramPrefixes.Text = .ProgramPrefixes
+			TextBoxPSFiledNames.Text = .PSFieldNames
+		End With
+
 
 		refreshFolderConfigutations()
 
-		startWatching()
+		startWatching(False)
 	End Sub
-
-	Public Property logs() As String
-		Get
-			logs = TextBoxLogging.Text
-		End Get
-
-		Set(value As String)
-			TextBoxLogging.Text = value
-		End Set
-	End Property
 
 
 	Private Sub TextBoxIntervall_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TextBoxIntervall.KeyPress
@@ -51,11 +47,6 @@ Public Class Form1
 		End If
 	End Sub
 
-	Private Sub TextBoxIntervall_Leave(sender As Object, e As EventArgs) Handles TextBoxIntervall.Leave
-		mainConfig.Intervall = TextBoxIntervall.Text
-
-	End Sub
-
 
 	Public Function selectFolder(oldValue As String) As String
 		Dim OpenFolderDialog As New FolderBrowserDialog()
@@ -72,7 +63,13 @@ Public Class Form1
 	End Function
 
 	Private Sub ButtonSaveMainSettings_Click(sender As Object, e As EventArgs) Handles ButtonSaveMainSettings.Click
+		mainConfig.Intervall = TextBoxIntervall.Text
+		mainConfig.FileExtensions = TextBoxFileExtensions.Text
+		mainConfig.ProgramPrefixes = TextBoxProgramPrefixes.Text
+		mainConfig.PSFieldNames = TextBoxPSFiledNames.Text
+
 		mainConfig.saveMainValues()
+		startWatching(True)
 	End Sub
 
 	Private Sub ButtonSaveFolderSettings_Click(sender As Object, e As EventArgs) Handles ButtonSaveFolderSettings.Click
@@ -83,6 +80,7 @@ Public Class Form1
 
 		newFolderConfig.inFolder = TextBoxInFolder.Text
 		newFolderConfig.outFolder = TextBoxOutFolder.Text
+		newFolderConfig.active = CheckBoxActive.Checked
 
 		mainConfig.saveFolderConfiguration(newFolderConfig, oldFolderconfig)
 
@@ -90,10 +88,12 @@ Public Class Form1
 		ToolTip1.IsBalloon = True
 		ToolTip1.UseFading = True
 		ToolTip1.ToolTipIcon = ToolTipIcon.None
-		ToolTip1.ToolTipTitle = "Speichern" & TextBoxIntervall.Text
+		ToolTip1.ToolTipTitle = "Speichern"
 		ToolTip1.Show("Werte werden gespeichert", ButtonSaveFolderSettings, New Point(0, -80), 1000)
 
 		refreshFolderConfigutations()
+		startWatching(True)
+
 	End Sub
 
 	Private Sub ButtonSelectInputFolder_Click_1(sender As Object, e As EventArgs) Handles ButtonSelectInputFolder.Click
@@ -108,6 +108,7 @@ Public Class Form1
 			Dim aFolderConfig As folderConfiguration = mainConfig.folderConfigurations.Item(lastSelectedIndex)
 			TextBoxInFolder.Text = aFolderConfig.inFolder
 			TextBoxOutFolder.Text = aFolderConfig.outFolder
+			CheckBoxActive.Checked = aFolderConfig.active
 		End If
 	End Sub
 
@@ -125,7 +126,7 @@ Public Class Form1
 	End Sub
 
 	Private Sub ButtonStart_Click(sender As Object, e As EventArgs) Handles ButtonStart.Click
-		startWatching()
+		startWatching(False)
 
 	End Sub
 
@@ -134,7 +135,7 @@ Public Class Form1
 		aFolderConfig.inFolder = ListBoxFolders.SelectedItem
 		mainConfig.deleteFolderConfiguration(aFolderConfig)
 		refreshFolderConfigutations()
-
+		startWatching(True)
 	End Sub
 
 	Private Sub refreshFolderConfigutations()
@@ -152,17 +153,38 @@ Public Class Form1
 		End If
   End Sub
 
-	Public Sub startWatching()
-		If ButtonStart.Text = "Start" Then
-			FolderWatcher.start()
-			ButtonStart.Text = "Stop"
-			LabelWatchedFolders.Text = mainConfig.folderConfigurations.Count & " Ordner werden überwacht."
+
+	Public Sub startWatching(keepActiveAction As Boolean)
+		Dim activeFolders As Integer
+		If keepActiveAction Then
+			If ButtonStart.Text = "Stop" Then
+				activeFolders = FolderWatcher.start()
+				ButtonStart.Text = "Stop"
+				LabelWatchedFolders.Text = activeFolders & " Ordner werden überwacht."
+			Else
+				FolderWatcher.stopWatching()
+				ButtonStart.Text = "Start"
+				LabelWatchedFolders.Text = "Ordnerüberwachung gestoppt!"
+			End If
 		Else
-			FolderWatcher.stopWatching()
-			ButtonStart.Text = "Start"
-			LabelWatchedFolders.Text = "Ordnerüberwachung gestoppt!"
+
+			If ButtonStart.Text = "Start" Then
+				activeFolders = FolderWatcher.start()
+				ButtonStart.Text = "Stop"
+				LabelWatchedFolders.Text = activeFolders & " Ordner werden überwacht."
+			Else
+				FolderWatcher.stopWatching()
+				ButtonStart.Text = "Start"
+				LabelWatchedFolders.Text = "Ordnerüberwachung gestoppt!"
+			End If
 		End If
 	End Sub
 
+	Private Sub Label5_Click(sender As Object, e As EventArgs) Handles Label5.Click
 
+	End Sub
+
+	Private Sub Label8_Click(sender As Object, e As EventArgs) Handles Label8.Click
+
+	End Sub
 End Class
