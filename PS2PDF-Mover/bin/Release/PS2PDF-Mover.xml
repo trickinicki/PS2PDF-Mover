@@ -1,0 +1,51 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+PS2PDF-Mover
+</name>
+</assembly>
+<members>
+<member name="T:PS2PDF_Mover.My.Resources.Resources">
+<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+<member name="P:PS2PDF_Mover.My.Resources.Resources.ResourceManager">
+<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member>
+<member name="P:PS2PDF_Mover.My.Resources.Resources.Culture">
+<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member>
+<member name="P:PS2PDF_Mover.config.FileExtensions">
+ <summary>
+ Filextensions with ; as separator
+ </summary>
+ <returns></returns>
+</member>
+<member name="P:PS2PDF_Mover.config.ProgramPrefixes">
+ <summary>
+ ProgramPrefixes with ; as separator
+ </summary>
+ <returns></returns>
+</member>
+<member name="P:PS2PDF_Mover.config.PSFieldNames">
+ <summary>
+ PSFieldNames with ; as separator
+ Default: %%Title:;job-name; file-name
+ </summary>
+ <returns></returns>
+</member>
+<member name="M:PS2PDF_Mover.FolderWatcher.start">
+ <summary>
+ Start Folder wacthing
+ </summary>
+ <returns>Number of active FileSystemWatcher</returns>
+</member>
+</members>
+</doc>
