@@ -157,6 +157,8 @@
     </None>
     <None Include="App.config" />
     <None Include="PS2PDF-Mover_TemporaryKey.pfx" />
+    <None Include="Testdata\sub\218102112_Einlageblatt_für_Adventsäöä%24karte.indd.ps" />
+    <None Include="Testdata\sub\Testseite.ps" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">

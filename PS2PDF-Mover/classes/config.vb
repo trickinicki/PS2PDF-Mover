@@ -32,10 +32,10 @@ Public Class config
 
 	''' <summary>
 	''' PSFieldNames with ; as separator
-	''' Default: job-name; file-name
+	''' Default: %%Title:;job-name; file-name
 	''' </summary>
 	''' <returns></returns>
-	Public Property PSFieldNames As String = "job-name; file-name"
+	Public Property PSFieldNames As String = "%%Title:;job-name; file-name"
 
 	Public Sub LoadConfig()
 		'Überprüft ob Konfigurationsdatei existiert undd öffnet diese
