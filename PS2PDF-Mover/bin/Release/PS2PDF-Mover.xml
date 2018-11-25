@@ -41,6 +41,62 @@ PS2PDF-Mover
  </summary>
  <returns></returns>
 </member>
+<member name="T:PS2PDF_Mover.Logger.BaseLogger">
+ <summary>
+ Abstract base class for all loggers.
+ </summary>
+</member>
+<member name="T:PS2PDF_Mover.Logger.EventTypes">
+ <summary>
+ Define the available event-types.
+ This just helps categorise the events.
+ </summary>
+</member>
+<member name="T:PS2PDF_Mover.Logger.FileLogger">
+ <summary>
+ Basic concrete Logger class
+ Logs exeception and events in /Logs
+ </summary>
+</member>
+<member name="T:PS2PDF_Mover.Logger.LoggerExtensions">
+ <summary>
+ Extension methods for the logger classes.
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="M:PS2PDF_Mover.Logger.LoggerExtensions.ToLogAsync(System.Exception,System.Boolean)">
+ <summary>
+ Logs the errror async using a background worker.
+ Will fall back to normal logging if async task are not allowed in this context.
+ </summary>
+</member>
+<member name="M:PS2PDF_Mover.Logger.LoggerExtensions.ToLogAsync(PS2PDF_Mover.Logger.LogEvent,System.Boolean)">
+ <summary>
+ Logs the event async using a background worker.
+ Will fall back to normal logging if async task are not allowed in this context.
+ </summary>
+</member>
+<member name="M:PS2PDF_Mover.Logger.LoggerExtensions.ToLog(System.Exception,System.Boolean)">
+ <summary>
+ Logs the exception to the log.
+ </summary>
+</member>
+<member name="M:PS2PDF_Mover.Logger.LoggerExtensions.ToLog(PS2PDF_Mover.Logger.LogEvent,System.Boolean)">
+ <summary>
+ Logs the event to the log.
+ </summary>
+</member>
+<member name="T:PS2PDF_Mover.Logger.LoggerLocator">
+ <summary>
+ Easy access to the active Logger.
+ </summary>
+</member>
+<member name="M:PS2PDF_Mover.Logger.MailNotification.SendLogMail(System.String)">
+ <summary>
+ Sends a mail to technik@froehlich.ch.
+ </summary>
+ <param name="msg">provide a msg for example an exception</param>
+</member>
 <member name="M:PS2PDF_Mover.FolderWatcher.start">
  <summary>
  Start Folder wacthing
