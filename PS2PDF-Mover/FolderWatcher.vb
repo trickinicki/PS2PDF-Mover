@@ -1,5 +1,5 @@
 ﻿Imports System.IO
-
+Imports PS2PDF_Mover.Logger
 
 Module FolderWatcher
 
@@ -20,11 +20,15 @@ Module FolderWatcher
 		Dim aCounter As Integer
 		For Each aFolderConfig In mainConfig.folderConfigurations
 			If aFolderConfig.active Then
-				Dim aNewfsw As New FileSystemWatcher(aFolderConfig.inFolder)
-				AddHandler aNewfsw.Changed, AddressOf OnChanged
-				aNewfsw.EnableRaisingEvents = True
-				m_fsw.Add(aNewfsw)
-				aCounter += 1
+				Try
+					Dim aNewfsw As New FileSystemWatcher(aFolderConfig.inFolder)
+					AddHandler aNewfsw.Changed, AddressOf OnChanged
+					aNewfsw.EnableRaisingEvents = True
+					m_fsw.Add(aNewfsw)
+					aCounter += 1
+				Catch ex As Exception
+					ToLog(ex)
+				End Try
 			End If
 		Next
 		Return aCounter
@@ -54,15 +58,30 @@ Module FolderWatcher
 			'Datei umbenamsen
 			Dim newFileName As String = getJobNameFromPS(e.FullPath)
 
+			Try 'Allenfalls vorhande Datei löschen
 
-			If File.Exists(outFolder & "\" & newFileName) Then File.Delete(outFolder & "\" & newFileName)
+				If File.Exists(outFolder & "\" & newFileName) Then
+					File.Delete(outFolder & "\" & newFileName)
 
-			'Datei verschieben
-			File.Move(e.FullPath, outFolder & "\" & newFileName)
+					Dim aEvent As New LogEvent
+					aEvent.EventType = EventTypes.fileDeleted
+					aEvent.Message = outFolder & "\" & newFileName
+					ToLog(aEvent)
+				End If
+			Catch ex As Exception
+				ToLog(ex)
+			End Try
 
-			''Log
-			'Dim aForm As New Form1
-			'aForm.logs = Format(Now, "dd.mm.yy hh:mm:ss") & ": " & outFolder & "\" & newFileName & vbCrLf & Form1.TextBoxLogging.Text
+			Try 'Datei verschieben
+				File.Move(e.FullPath, outFolder & "\" & newFileName)
+
+				Dim aEvent As New LogEvent
+				aEvent.EventType = EventTypes.fileMoved
+				aEvent.Message = outFolder & "\" & newFileName
+				ToLog(aEvent)
+			Catch ex As Exception
+				ToLog(ex)
+			End Try
 
 		End If
 

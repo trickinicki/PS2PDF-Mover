@@ -109,12 +109,18 @@
   <ItemGroup>
     <Compile Include="classes\config.vb" />
     <Compile Include="classes\folderConfiguration.vb" />
+    <Compile Include="classes\Logger\BaseLogger.vb" />
+    <Compile Include="classes\Logger\EventTypes.vb" />
+    <Compile Include="classes\Logger\FileLogger.vb" />
+    <Compile Include="classes\Logger\LogEvent.vb" />
+    <Compile Include="classes\Logger\LoggerExtensions.vb" />
+    <Compile Include="classes\Logger\LoggerLocator.vb" />
+    <Compile Include="classes\Logger\MailNotification.vb" />
     <Compile Include="FolderWatcher.vb" />
-    <Compile Include="Form1.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Form1.Designer.vb">
       <DependentUpon>Form1.vb</DependentUpon>
+    </Compile>
+    <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
