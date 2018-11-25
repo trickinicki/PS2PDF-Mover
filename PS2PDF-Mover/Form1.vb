@@ -1,4 +1,5 @@
-﻿Imports System.IO
+﻿Imports PS2PDF_Mover.Logger
+
 
 Public Class Form1
 
@@ -11,6 +12,11 @@ Public Class Form1
 		InitializeComponent()
 
 		' Fügen Sie Initialisierungen nach dem InitializeComponent()-Aufruf hinzu.
+
+		Dim aEvent As New LogEvent
+		aEvent.EventType = EventTypes.applicationStartet
+		Logger.ToLog(aEvent)
+
 		mainConfig.LoadConfig()
 
 		With mainConfig
@@ -19,7 +25,6 @@ Public Class Form1
 			TextBoxProgramPrefixes.Text = .ProgramPrefixes
 			TextBoxPSFiledNames.Text = .PSFieldNames
 		End With
-
 
 		refreshFolderConfigutations()
 

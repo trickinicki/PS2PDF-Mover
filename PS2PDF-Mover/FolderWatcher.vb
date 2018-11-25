@@ -1,5 +1,5 @@
 ﻿Imports System.IO
-
+Imports PS2PDF_Mover.Logger
 
 Module FolderWatcher
 
@@ -20,11 +20,15 @@ Module FolderWatcher
 		Dim aCounter As Integer
 		For Each aFolderConfig In mainConfig.folderConfigurations
 			If aFolderConfig.active Then
-				Dim aNewfsw As New FileSystemWatcher(aFolderConfig.inFolder)
-				AddHandler aNewfsw.Changed, AddressOf OnChanged
-				aNewfsw.EnableRaisingEvents = True
-				m_fsw.Add(aNewfsw)
-				aCounter += 1
+				Try
+					Dim aNewfsw As New FileSystemWatcher(aFolderConfig.inFolder)
+					AddHandler aNewfsw.Changed, AddressOf OnChanged
+					aNewfsw.EnableRaisingEvents = True
+					m_fsw.Add(aNewfsw)
+					aCounter += 1
+				Catch ex As Exception
+					ToLog(ex)
+				End Try
 			End If
 		Next
 		Return aCounter
@@ -54,15 +58,30 @@ Module FolderWatcher
 			'Datei umbenamsen
 			Dim newFileName As String = getJobNameFromPS(e.FullPath)
 
+			Try 'Allenfalls vorhande Datei löschen
 
-			If File.Exists(outFolder & "\" & newFileName) Then File.Delete(outFolder & "\" & newFileName)
+				If File.Exists(outFolder & "\" & newFileName) Then
+					File.Delete(outFolder & "\" & newFileName)
 
-			'Datei verschieben
-			File.Move(e.FullPath, outFolder & "\" & newFileName)
+					Dim aEvent As New LogEvent
+					aEvent.EventType = EventTypes.fileDeleted
+					aEvent.Message = outFolder & "\" & newFileName
+					ToLog(aEvent)
+				End If
+			Catch ex As Exception
+				ToLog(ex)
+			End Try
 
-			''Log
-			'Dim aForm As New Form1
-			'aForm.logs = Format(Now, "dd.mm.yy hh:mm:ss") & ": " & outFolder & "\" & newFileName & vbCrLf & Form1.TextBoxLogging.Text
+			Try 'Datei verschieben
+				File.Move(e.FullPath, outFolder & "\" & newFileName)
+
+				Dim aEvent As New LogEvent
+				aEvent.EventType = EventTypes.fileMoved
+				aEvent.Message = outFolder & "\" & newFileName
+				ToLog(aEvent)
+			Catch ex As Exception
+				ToLog(ex)
+			End Try
 
 		End If
 
@@ -84,9 +103,30 @@ Module FolderWatcher
 	Public Function getJobNameFromPS(filename As String) As String
 		'<job-name syntax= "name" xml:Space = "preserve" > Microsoft Word - Brief an Neff 26-06-2018.docx</job-name>
 		'<file-name syntax="text" xml:space="preserve">Microsoft Word - Brief an Neff 26-06-2018.docx</file-name>
+		'%%Title: Testseite
 		Dim aLine As String
 		Dim reader As New StreamReader(filename, System.Text.Encoding.Default)
 		Dim lineCounter As Integer
+
+		Dim badCharcter As New List(Of String())
+		badCharcter.Add((":,").Split(","))
+		badCharcter.Add(("&,-").Split(","))
+		badCharcter.Add((":,-").Split(","))
+
+		badCharcter.Add(("\328,Ä").Split(","))
+		badCharcter.Add(("\336,Ö").Split(","))
+		badCharcter.Add(("\334,Ü").Split(","))
+
+		badCharcter.Add(("\344,ä").Split(","))
+		badCharcter.Add(("\366,ö").Split(","))
+		badCharcter.Add(("\374,ü").Split(","))
+
+		badCharcter.Add(("\307,C").Split(","))  'Ç
+		badCharcter.Add(("\347,C").Split(","))  'ç
+
+		badCharcter.Add(("/,-").Split(","))
+		badCharcter.Add(("\,-").Split(","))
+
 
 		Dim PSFieldNames As New List(Of String)
 		PSFieldNames = (From s In mainConfig.PSFieldNames.Split(";") Select s).ToList()
@@ -102,13 +142,18 @@ Module FolderWatcher
 			aLine = reader.ReadLine
 			For Each aName As String In PSFieldNames
 
-				If aLine.IndexOf(aName) > 0 Then
+				If aLine.IndexOf(aName) >= 0 Then
+					Dim newName As String = aLine
 					reader.Close()
 
-					Dim startIndex As Integer = aLine.IndexOf(">")
-					Dim StopIndex As Integer = aLine.IndexOf("<", startIndex)
+					Dim startIndex As Double = aLine.IndexOf(">") 'Defined as double because returns -1 if not found
+					If startIndex > 0 Then
+						Dim StopIndex As Double = aLine.IndexOf("<", CInt(startIndex))
+						newName = newName.Substring(startIndex + 1, StopIndex - startIndex - 1)
+					Else
+						newName = newName.Replace(aName, "")
+					End If
 
-					Dim newName As String = aLine.Substring(startIndex + 1, StopIndex - startIndex - 1)
 					For Each aExtension In fileExtension
 						If aExtension <> "" Then newName = newName.Replace(aExtension, "")
 					Next
@@ -117,8 +162,22 @@ Module FolderWatcher
 						If aProgramPrefixes <> "" Then newName = newName.Replace(aProgramPrefixes, "")
 					Next
 
+					For Each aCharacter In badCharcter
+						newName = newName.Replace(aCharacter(0), aCharacter(1))
+					Next
 
-					Return newName & ".ps"
+					newName = newName.Trim
+					newName = newName.Replace("  ", " ")
+
+					If Left(newName, 1) = "(" Then
+						newName = Right(newName, newName.Length - 1)
+					End If
+
+					If Right(newName, 1) = ")" Then
+						newName = Left(newName, newName.Length - 1)
+					End If
+
+					Return newName.Trim & ".ps"
 
 				End If
 
@@ -128,7 +187,7 @@ Module FolderWatcher
 		Loop Until aLine Is Nothing
 		reader.Close()
 
-		Return "Unbekanntes Dokument" & CStr(Date.Today).Replace(".", "-") & ".ps"
+		Return "Unbekanntes Dokument" & CStr(Date.Now).Replace(".", "-").Replace(":", "-") & ".ps"
 
 
 	End Function
