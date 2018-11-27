@@ -116,7 +116,8 @@
     <Compile Include="classes\Logger\LoggerExtensions.vb" />
     <Compile Include="classes\Logger\LoggerLocator.vb" />
     <Compile Include="classes\Logger\MailNotification.vb" />
-    <Compile Include="FolderWatcher.vb" />
+    <Compile Include="functions\characterReplacement.vb" />
+    <Compile Include="functions\FolderWatcher.vb" />
     <Compile Include="Form1.Designer.vb">
       <DependentUpon>Form1.vb</DependentUpon>
     </Compile>
