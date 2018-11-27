@@ -1,4 +1,6 @@
-﻿Imports System.IO
+﻿Option Explicit On
+
+Imports System.IO
 Imports PS2PDF_Mover.Logger
 
 Module FolderWatcher
@@ -108,26 +110,6 @@ Module FolderWatcher
 		Dim reader As New StreamReader(filename, System.Text.Encoding.Default)
 		Dim lineCounter As Integer
 
-		Dim badCharcter As New List(Of String())
-		badCharcter.Add((":,").Split(","))
-		badCharcter.Add(("&,-").Split(","))
-		badCharcter.Add((":,-").Split(","))
-
-		badCharcter.Add(("\328,Ä").Split(","))
-		badCharcter.Add(("\336,Ö").Split(","))
-		badCharcter.Add(("\334,Ü").Split(","))
-
-		badCharcter.Add(("\344,ä").Split(","))
-		badCharcter.Add(("\366,ö").Split(","))
-		badCharcter.Add(("\374,ü").Split(","))
-
-		badCharcter.Add(("\307,C").Split(","))  'Ç
-		badCharcter.Add(("\347,C").Split(","))  'ç
-
-		badCharcter.Add(("/,-").Split(","))
-		badCharcter.Add(("\,-").Split(","))
-
-
 		Dim PSFieldNames As New List(Of String)
 		PSFieldNames = (From s In mainConfig.PSFieldNames.Split(";") Select s).ToList()
 
@@ -162,10 +144,6 @@ Module FolderWatcher
 						If aProgramPrefixes <> "" Then newName = newName.Replace(aProgramPrefixes, "")
 					Next
 
-					For Each aCharacter In badCharcter
-						newName = newName.Replace(aCharacter(0), aCharacter(1))
-					Next
-
 					newName = newName.Trim
 					newName = newName.Replace("  ", " ")
 
@@ -176,6 +154,8 @@ Module FolderWatcher
 					If Right(newName, 1) = ")" Then
 						newName = Left(newName, newName.Length - 1)
 					End If
+
+					newName = characterReplacement.properFilename(newName)
 
 					Return newName.Trim & ".ps"
 
