@@ -51,6 +51,7 @@ Partial Class Form1
 		Me.TextBoxPSFiledNames = New System.Windows.Forms.TextBox()
 		Me.Label7 = New System.Windows.Forms.Label()
 		Me.Label8 = New System.Windows.Forms.Label()
+		Me.TextBoxLog = New System.Windows.Forms.TextBox()
 		Me.Panel1.SuspendLayout()
 		Me.SuspendLayout()
 		'
@@ -318,11 +319,20 @@ Partial Class Form1
 		Me.Label8.TabIndex = 26
 		Me.Label8.Text = "Version 0.1 - 20.11.2018 - ND"
 		'
+		'TextBoxLog
+		'
+		Me.TextBoxLog.Location = New System.Drawing.Point(20, 314)
+		Me.TextBoxLog.Multiline = True
+		Me.TextBoxLog.Name = "TextBoxLog"
+		Me.TextBoxLog.Size = New System.Drawing.Size(552, 92)
+		Me.TextBoxLog.TabIndex = 27
+		'
 		'Form1
 		'
 		Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
 		Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
 		Me.ClientSize = New System.Drawing.Size(781, 431)
+		Me.Controls.Add(Me.TextBoxLog)
 		Me.Controls.Add(Me.Label8)
 		Me.Controls.Add(Me.Label7)
 		Me.Controls.Add(Me.TextBoxPSFiledNames)
@@ -376,4 +386,5 @@ Partial Class Form1
 	Friend WithEvents TextBoxPSFiledNames As TextBox
 	Friend WithEvents Label7 As Label
 	Friend WithEvents Label8 As Label
+	Friend WithEvents TextBoxLog As TextBox
 End Class

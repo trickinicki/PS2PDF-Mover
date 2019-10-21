@@ -8,7 +8,7 @@ Public Class config
 
 	Private Property configFile As New XDocument
 	Public Property appPath As String = Application.StartupPath() & Path.DirectorySeparatorChar
-	Public Property ConfigFileName As String = "ps2pdf.config"
+	Public Property configFileName As String = "ps2pdf.config"
 
 	Public ReadOnly Property folderConfigurations As List(Of folderConfiguration)
 		Get
@@ -16,18 +16,18 @@ Public Class config
 		End Get
 	End Property
 
-	Public Property Intervall As Integer = 1
+	Public Property intervall As Integer = 1
 	''' <summary>
 	''' Filextensions with ; as separator
 	''' </summary>
 	''' <returns></returns>
-	Public Property FileExtensions As String
+	Public Property fileExtensions As String
 
 	''' <summary>
 	''' ProgramPrefixes with ; as separator
 	''' </summary>
 	''' <returns></returns>
-	Public Property ProgramPrefixes As String
+	Public Property programPrefixes As String
 
 
 	''' <summary>
@@ -35,9 +35,9 @@ Public Class config
 	''' Default: job-name; file-name
 	''' </summary>
 	''' <returns></returns>
-	Public Property PSFieldNames As String = "job-name; file-name"
+	Public Property psFieldNames As String = "job-name; file-name"
 
-	Public Sub LoadConfig()
+	Public Sub loadConfig()
 		'Überprüft ob Konfigurationsdatei existiert undd öffnet diese
 		'Falls die Datei noch nicht vorhanden ist wird sie generiert
 		'und mit den nötigen Nodes versehen
@@ -46,9 +46,9 @@ Public Class config
 		Dim saveConfig As Boolean = False
 
 		'Überprüfen ob Dokument existiert
-		Dim FI As New FileInfo(appPath & ConfigFileName)
+		Dim FI As New FileInfo(appPath & configFileName)
 		If FI.Exists Then
-			configFile = XDocument.Load(appPath & ConfigFileName) 'Öffnen der Konfigurationsdatei
+			configFile = XDocument.Load(appPath & configFileName) 'Öffnen der Konfigurationsdatei
 		Else 'create File
 			configFile = <?xml version="1.0" encoding="UTF-8"?>
 									 <config>
@@ -60,7 +60,7 @@ Public Class config
 			saveConfig = True
 		End If
 
-		If saveConfig Then configFile.Save(appPath & ConfigFileName)
+		If saveConfig Then configFile.Save(appPath & configFileName)
 
 		getMainValues()
 
@@ -140,10 +140,11 @@ Public Class config
 
 		If xmlFolderConfiguration.Nodes().Count > 0 Then
 			For Each aNode As XElement In xmlFolderConfiguration.Descendants("folderConfiguration")
-				Dim aNewFolderConfiguration As New folderConfiguration
-				aNewFolderConfiguration.inFolder = aNode.Descendants("inFolder").First.Value
-				aNewFolderConfiguration.outFolder = aNode.Descendants("outFolder").First.Value
-				aNewFolderConfiguration.active = aNode.Descendants("active").First.Value
+				Dim aNewFolderConfiguration As New folderConfiguration With {
+					.inFolder = aNode.Descendants("inFolder").First.Value,
+					.outFolder = aNode.Descendants("outFolder").First.Value,
+					.active = aNode.Descendants("active").First.Value
+				}
 				manyFolderConfigutations.Add(aNewFolderConfiguration)
 			Next
 		End If
@@ -189,6 +190,24 @@ Public Class config
 		'getFoldersConfiguration()
 
 	End Sub
+
+	Public Function checkFolderConfiguration(configuration As folderConfiguration, Optional showMessage As Boolean = False) As Boolean
+
+		If configuration.active Then
+			If Directory.Exists(configuration.inFolder) Then
+				If Not Directory.Exists(configuration.outFolder) Then
+					If showMessage Then MsgBox(configuration.outFolder & " existiert nicht, konfiguration deaktiviert.")
+					Return False
+				End If
+			Else
+				If showMessage Then MsgBox(configuration.inFolder & " existiert nicht, konfiguration deaktiviert.")
+				Return False
+			End If
+		End If
+
+		Return configuration.active
+
+	End Function
 
 	Public Sub saveConfigFile()
 		configFile.Save(appPath & ConfigFileName)

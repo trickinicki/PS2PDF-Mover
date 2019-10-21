@@ -3,8 +3,8 @@ Imports PS2PDF_Mover.Logger
 
 Module FolderWatcher
 
-	Private m_fsw As New List(Of IO.FileSystemWatcher)
-	Private mainConfig As New config
+	Private ReadOnly m_fsw As New List(Of IO.FileSystemWatcher)
+	Private ReadOnly mainConfig As New config
 
 	''' <summary>
 	''' Start Folder wacthing
@@ -15,20 +15,42 @@ Module FolderWatcher
 		'Stop any ongoing filewatcher
 		stopWatching()
 
-
 		mainConfig.LoadConfig()
 		Dim aCounter As Integer
 		For Each aFolderConfig In mainConfig.folderConfigurations
+
 			If aFolderConfig.active Then
-				Try
-					Dim aNewfsw As New FileSystemWatcher(aFolderConfig.inFolder)
-					AddHandler aNewfsw.Changed, AddressOf OnChanged
-					aNewfsw.EnableRaisingEvents = True
-					m_fsw.Add(aNewfsw)
-					aCounter += 1
-				Catch ex As Exception
-					ToLog(ex)
-				End Try
+				Dim validConfig As Boolean
+				validConfig = mainConfig.checkFolderConfiguration(aFolderConfig, False)
+				If validConfig Then
+
+					Try
+						Dim aNewfsw As New FileSystemWatcher(aFolderConfig.inFolder)
+						AddHandler aNewfsw.Changed, AddressOf OnChanged
+						aNewfsw.EnableRaisingEvents = True
+						m_fsw.Add(aNewfsw)
+						aCounter += 1
+
+						'Process files already in Folder
+						Dim aDirectoryInfo As New DirectoryInfo(aFolderConfig.inFolder)
+						For Each aFile As FileInfo In aDirectoryInfo.GetFiles
+							Try
+								MoveFile(aFile.FullName, aFile.Name)
+							Catch ex As Exception
+								ex.ToLog
+							End Try
+
+						Next
+					Catch ex As Exception
+						ex.ToLog
+					End Try
+				Else
+					Try
+						Form1.TextBoxLog.Text = "ACHTUNG: Fehlerhafte Ordnerkonfiguration!" & vbCrLf & aFolderConfig.inFolder & " -> " & aFolderConfig.outFolder
+					Catch ex As Exception
+						MsgBox(ex.Message)
+					End Try
+				End If
 			End If
 		Next
 		Return aCounter
@@ -43,47 +65,61 @@ Module FolderWatcher
 
 	Private Async Sub OnChanged(sender As Object, e As FileSystemEventArgs)
 
-		If Await IsFileReady(e.FullPath) Then
+		Try
+			If Await IsFileReady(e.FullPath) Then
+				MoveFile(e.FullPath, e.Name)
+			End If
+		Catch ex As Exception
+			ex.ToLog
+		End Try
 
-			'get outFolder name
-			Dim inFolder As String = e.FullPath.Replace("\" & e.Name, "")
-			Dim outFolder As String = ""
-			For Each aFolderconfig In mainConfig.folderConfigurations
-				If aFolderconfig.inFolder = inFolder Then
-					outFolder = aFolderconfig.outFolder
-					Exit For
-				End If
-			Next
+	End Sub
 
-			'Datei umbenamsen
-			Dim newFileName As String = getJobNameFromPS(e.FullPath)
+	Public Sub MoveFile(FullPath As String, fileName As String)
+		'get outFolder name
+		Dim inFolder As String = FullPath.Replace("\" & fileName, "")
+		Dim outFolder As String = ""
+		For Each aFolderconfig In mainConfig.folderConfigurations
+			If aFolderconfig.inFolder = inFolder Then
+				outFolder = aFolderconfig.outFolder
+				Exit For
+			End If
+		Next
 
-			Try 'Allenfalls vorhande Datei löschen
+		Dim newFileName As String = "newFile"
+		Try 'Datei umbenamsen
+			newFileName = getJobNameFromPS(FullPath)
+		Catch ex As Exception
+			ex.ToLog
+		End Try
 
-				If File.Exists(outFolder & "\" & newFileName) Then
-					File.Delete(outFolder & "\" & newFileName)
+		Try 'Allenfalls vorhande Datei löschen
 
-					Dim aEvent As New LogEvent
-					aEvent.EventType = EventTypes.fileDeleted
-					aEvent.Message = outFolder & "\" & newFileName
-					ToLog(aEvent)
-				End If
-			Catch ex As Exception
-				ToLog(ex)
-			End Try
+			If File.Exists(outFolder & "\" & newFileName) Then
+				File.Delete(outFolder & "\" & newFileName)
 
-			Try 'Datei verschieben
-				File.Move(e.FullPath, outFolder & "\" & newFileName)
-
-				Dim aEvent As New LogEvent
-				aEvent.EventType = EventTypes.fileMoved
-				aEvent.Message = outFolder & "\" & newFileName
+				Dim aEvent As New LogEvent With {
+					.EventType = EventTypes.fileDeleted,
+					.Message = outFolder & "\" & newFileName
+				}
 				ToLog(aEvent)
-			Catch ex As Exception
-				ToLog(ex)
-			End Try
+			End If
+		Catch ex As Exception
+			ex.ToLog
+		End Try
 
-		End If
+		Try 'Datei verschieben
+			File.Move(FullPath, outFolder & "\" & newFileName)
+
+			Dim aEvent As New LogEvent With {
+				.EventType = EventTypes.fileMoved,
+				.Message = outFolder & "\" & newFileName
+			}
+			ToLog(aEvent)
+		Catch ex As Exception
+			ex.ToLog
+			Form1.TextBoxLog.Text = String.Format("{0}; {1};", DateTime.Now, ex.ToString()) & vbCrLf & Form1.TextBoxLog.Text
+		End Try
 
 	End Sub
 
@@ -138,57 +174,61 @@ Module FolderWatcher
 		Dim ProgramPrefixes As New List(Of String) 
 		ProgramPrefixes = (From s In mainConfig.ProgramPrefixes.Split(";") Select s).ToList()
 
-		Do
-			aLine = reader.ReadLine
-			For Each aName As String In PSFieldNames
+		Try
+			Do
+				aLine = reader.ReadLine
+				For Each aName As String In PSFieldNames
 
-				If aLine.IndexOf(aName) >= 0 Then
-					Dim newName As String = aLine
-					reader.Close()
+					If aLine.IndexOf(aName) >= 0 Then
+						Dim newName As String = aLine
+						reader.Close()
 
-					Dim startIndex As Double = aLine.IndexOf(">") 'Defined as double because returns -1 if not found
-					If startIndex > 0 Then
-						Dim StopIndex As Double = aLine.IndexOf("<", CInt(startIndex))
-						newName = newName.Substring(startIndex + 1, StopIndex - startIndex - 1)
-					Else
-						newName = newName.Replace(aName, "")
+						Dim startIndex As Double = aLine.IndexOf(">") 'Defined as double because returns -1 if not found
+						If startIndex > 0 Then
+							Dim StopIndex As Double = aLine.IndexOf("<", CInt(startIndex))
+							newName = newName.Substring(startIndex + 1, StopIndex - startIndex - 1)
+						Else
+							newName = newName.Replace(aName, "")
+						End If
+
+						For Each aExtension In fileExtension
+							If aExtension <> "" Then newName = newName.Replace(aExtension, "")
+						Next
+
+						For Each aProgramPrefixes In ProgramPrefixes
+							If aProgramPrefixes <> "" Then newName = newName.Replace(aProgramPrefixes, "")
+						Next
+
+						For Each aCharacter In badCharcter
+							newName = newName.Replace(aCharacter(0), aCharacter(1))
+						Next
+
+						newName = newName.Trim
+						newName = newName.Replace("  ", " ")
+
+						If Left(newName, 1) = "(" Then
+							newName = Right(newName, newName.Length - 1)
+						End If
+
+						If Right(newName, 1) = ")" Then
+							newName = Left(newName, newName.Length - 1)
+						End If
+
+						Return newName.Trim & ".ps"
+
 					End If
 
-					For Each aExtension In fileExtension
-						If aExtension <> "" Then newName = newName.Replace(aExtension, "")
-					Next
+				Next
+				lineCounter += 1
+				If lineCounter > 100 Then Exit Do
+			Loop Until aLine Is Nothing
+			reader.Close()
 
-					For Each aProgramPrefixes In ProgramPrefixes
-						If aProgramPrefixes <> "" Then newName = newName.Replace(aProgramPrefixes, "")
-					Next
-
-					For Each aCharacter In badCharcter
-						newName = newName.Replace(aCharacter(0), aCharacter(1))
-					Next
-
-					newName = newName.Trim
-					newName = newName.Replace("  ", " ")
-
-					If Left(newName, 1) = "(" Then
-						newName = Right(newName, newName.Length - 1)
-					End If
-
-					If Right(newName, 1) = ")" Then
-						newName = Left(newName, newName.Length - 1)
-					End If
-
-					Return newName.Trim & ".ps"
-
-				End If
-
-			Next
-			lineCounter += 1
-			If lineCounter > 100 Then Exit Do
-		Loop Until aLine Is Nothing
-		reader.Close()
-
-		Return "Unbekanntes Dokument" & CStr(Date.Now).Replace(".", "-").Replace(":", "-") & ".ps"
-
+			Return "Unbekanntes Dokument" & CStr(Date.Now).Replace(".", "-").Replace(":", "-") & ".ps"
+		Catch ex As Exception
+			ex.ToLog
+			Return "Crached -- Unbekanntes Dokument" & CStr(Date.Now).Replace(".", "-").Replace(":", "-") & ".ps"
+		End Try
 
 	End Function
 

@@ -26,16 +26,18 @@ Namespace Logger
       CheckLogfile(_filenameEvents)
 
       Try
-        Using writer As StreamWriter = File.AppendText(_filepath + _filenameEvents)
-          writer.WriteLine(String.Format("{0}; {1}; {2}; {3};", DateTime.Now, eventType.EventType.ToString(), eventType.User, eventType.Message))
-          writer.Flush()
-        End Using
-        If (sendMail) Then
+				Using writer As StreamWriter = File.AppendText(_filepath + _filenameEvents)
+					writer.WriteLine(String.Format("{0}; {1}; {2}; {3};", DateTime.Now, eventType.EventType.ToString(), eventType.User, eventType.Message))
+					writer.Flush()
+				End Using
+
+				Form1.TextBoxLog.Text = String.Format("{0}; {1}; {2}; {3};", DateTime.Now, eventType.EventType.ToString(), eventType.User, eventType.Message) & vbCrLf & Form1.TextBoxLog.Text
+				If (sendMail) Then
           MailNotification.SendLogMail(String.Format("{0}; {1}; {2}", eventType.EventType, eventType.User, eventType.Message))
         End If
       Catch ex As Exception
-        Throw
-      End Try
+				' Throw
+			End Try
 
       CheckLogSize(_filenameEvents)
     End Sub
@@ -44,16 +46,17 @@ Namespace Logger
       CheckLogfile(_filenameExceptions)
 
       Try
-        Using writer As StreamWriter = File.AppendText(_filepath + _filenameExceptions)
-          writer.WriteLine(String.Format("{0}; {1};", DateTime.Now, exception.ToString()))
-          writer.Flush()
-        End Using
-        If (sendMail) Then
+				Using writer As StreamWriter = File.AppendText(_filepath + _filenameExceptions)
+					writer.WriteLine(String.Format("{0}; {1};", DateTime.Now, exception.ToString()))
+					writer.Flush()
+				End Using
+
+				If (sendMail) Then
           MailNotification.SendLogMail(exception.ToString())
         End If
       Catch ex As Exception
-        Throw
-      End Try
+				Throw
+			End Try
 
       CheckLogSize(_filenameExceptions)
     End Sub

@@ -1,5 +1,5 @@
 ﻿Imports PS2PDF_Mover.Logger
-
+Imports System.IO
 
 Public Class Form1
 
@@ -80,12 +80,15 @@ Public Class Form1
 	Private Sub ButtonSaveFolderSettings_Click(sender As Object, e As EventArgs) Handles ButtonSaveFolderSettings.Click
 		Dim oldFolderconfig As New folderConfiguration
 		Dim newFolderConfig As New folderConfiguration
+		Dim config As New config
 
 		oldFolderconfig.inFolder = ListBoxFolders.SelectedItem
 
 		newFolderConfig.inFolder = TextBoxInFolder.Text
 		newFolderConfig.outFolder = TextBoxOutFolder.Text
 		newFolderConfig.active = CheckBoxActive.Checked
+
+		newFolderConfig.active = config.checkFolderConfiguration(newFolderConfig, True)
 
 		mainConfig.saveFolderConfiguration(newFolderConfig, oldFolderconfig)
 
@@ -156,7 +159,7 @@ Public Class Form1
 			End If
 			ListBoxFolders.SelectedIndex = lastSelectedIndex
 		End If
-  End Sub
+	End Sub
 
 
 	Public Sub startWatching(keepActiveAction As Boolean)
@@ -185,11 +188,6 @@ Public Class Form1
 		End If
 	End Sub
 
-	Private Sub Label5_Click(sender As Object, e As EventArgs) Handles Label5.Click
 
-	End Sub
 
-	Private Sub Label8_Click(sender As Object, e As EventArgs) Handles Label8.Click
-
-	End Sub
 End Class
